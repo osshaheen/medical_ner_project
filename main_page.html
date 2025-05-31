@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Medical NER Tool</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .form-section {
+      width: 33.33%;
+      padding: 30px;
+      background-color: #f4f4f4;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .results-section {
+      width: 66.66%;
+      padding: 30px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+      resize: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #999;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e0e0e0;
+    }
+
+    #loading {
+      margin-top: 20px;
+      color: #777;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Form Panel (1/3) -->
+    <div class="form-section">
+      <h2>Medical Entity Extraction</h2>
+      <form id="nerForm">
+        <label for="text">Enter medical text:</label><br>
+        <textarea name="text" id="text" placeholder="Type or paste medical text here..."></textarea><br>
+        <button type="submit">Analyze</button>
+      </form>
+      <div id="loading"></div>
+    </div>
+
+    <!-- Results Panel (2/3) -->
+    <div class="results-section">
+      <h2>NER Results</h2>
+      <div id="results"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("nerForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const textarea = this.elements["text"];
+      const text = textarea.value.trim();
+      const resultsDiv = document.getElementById("results");
+      const loadingDiv = document.getElementById("loading");
+
+      if (!text) {
+        alert("Please enter some text first.");
+        return;
+      }
+
+      loadingDiv.textContent = "Analyzing...";
+      resultsDiv.innerHTML = "";
+
+      fetch("http://108.181.198.85:5000/ner", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({ text })
+      })
+      .then(response => response.text())
+      .then(html => {
+        resultsDiv.innerHTML = html;
+        loadingDiv.textContent = "";
+      })
+      .catch(error => {
+        resultsDiv.innerHTML = "<p style='color:red;'>An error occurred while contacting the server.</p>";
+        loadingDiv.textContent = "";
+        console.error("Error:", error);
+      });
+    });
+  </script>
+</body>
+</html>

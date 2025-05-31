@@ -9,11 +9,11 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForTokenClassification.from_pretrained(model_name)
 ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
 
-@app.route("/ner", methods=["GET"])
+@app.route("/ner", methods=["POST"])
 def ner():
-    text = request.args.get("text", "")
+    text = request.form.get("text", "")
     if not text:
-        return "<h3>Missing 'text' query parameter</h3>", 400
+        return "<h3>Missing 'text' form parameter</h3>", 400
 
     results = ner_pipeline(text)
     simplified_results = [
@@ -30,32 +30,10 @@ def ner():
         for item in simplified_results
     )
     html = f"""
-    <html>
-    <head>
-        <title>NER Results</title>
-        <style>
-            table {{
-                border-collapse: collapse;
-                width: 50%;
-                margin: 20px auto;
- }}
-            th, td {{
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: center;
-            }}
-            th {{
-                background-color: #f2f2f2;
-            }}
-        </style>
-    </head>
-    <body>
-        <h2 style="text-align:center;">NER Output</h2>
-        <table>
-            <tr><th>Entity Group</th><th>Word</th></tr>
-            {table_rows}
-        </table>
-    </body>
-    </html>
+    <table>
+        <tr><th>Entity Group</th><th>Word</th></tr>
+        {table_rows}
+    </table>
     """
     return html
+
