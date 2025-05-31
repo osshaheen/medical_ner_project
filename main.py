@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 
 app = Flask(__name__)
@@ -37,3 +37,6 @@ def ner():
     """
     return html
 
+@app.route("/", methods=["GET"])
+def serve_main_page():
+    return render_template("main_page.html")
