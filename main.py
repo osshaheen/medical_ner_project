@@ -1,7 +1,10 @@
 from flask import Flask, request, render_template
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+from flask_wtf.csrf import CSRFProtect
+from markupsafe import escape
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 
 # Load model and tokenizer
 model_name = "blaze999/Medical-NER"
@@ -12,6 +15,7 @@ ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_str
 @app.route("/ner", methods=["POST"])
 def ner():
     text = request.form.get("text", "")
+    text = escape(text)  # منع XSS
     if not text:
         return "<h3>Missing 'text' form parameter</h3>", 400
 
